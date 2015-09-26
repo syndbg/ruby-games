@@ -1,6 +1,8 @@
 class Bullet
   SPEED = 5
 
+  attr_reader :x, :y, :radius
+
   def initialize(window, x, y, angle)
     @image = Gosu::Image.new('images/bullet.png')
 
@@ -18,5 +20,14 @@ class Bullet
 
   def draw
     @image.draw(@x - @radius, @y - @radius, 1)
+  end
+
+  def onscreen?
+    left = -@radius
+    right = @window.width + @radius
+    top = -@radius
+    bottom = @window.height + @radius
+
+    @x > left && @x < right && @y > top && @y < bottom
   end
 end
