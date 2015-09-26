@@ -6,6 +6,8 @@ class Player
   FRICTION = 0.8
   TURN_RATE = 4
 
+  attr_reader :x, :y, :angle, :radius
+
   def initialize(window)
     @image = Gosu::Image.new('images/ship.png')
 
