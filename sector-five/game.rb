@@ -9,16 +9,23 @@ class SectorFive < Gosu::Window
   SCREEN_WIDTH = 800
   SCREEN_HEIGHT = 600
 
+  HIT_SCORE = 5
+  DEATH_SCORE = 50
+
   ENEMY_SPAWN_RATE = 0.02
 
   def initialize
     super(SCREEN_WIDTH, SCREEN_HEIGHT)
+    @font = Gosu::Font.new(30)
+
     self.caption = 'Sector Five'
     @player = Player.new(self)
 
     @bullets = []
     @explosions = []
     @enemies = []
+
+    @score = 0
   end
 
   def draw
@@ -26,6 +33,12 @@ class SectorFive < Gosu::Window
     @enemies.map(&:draw)
     @bullets.map(&:draw)
     @explosions.map(&:draw)
+
+    draw_score
+  end
+
+  def draw_score
+    @font.draw(@score.to_s, 700, 20, 2)
   end
 
   def button_down(id)
@@ -37,18 +50,28 @@ class SectorFive < Gosu::Window
   end
 
   def update
+    listen_to_player_movements
+
+    @enemies.push(Enemy.new(self)) if rand < ENEMY_SPAWN_RATE
+
+    move_entities
+    calculate_collisions
+    clear_entities
+  end
+
+  def move_entities
+    @enemies.map(&:move)
+    @bullets.map(&:move)
+  end
+
+  def listen_to_player_movements
     @player.turn_left if button_down? Gosu::KbLeft
     @player.turn_right if button_down? Gosu::KbRight
     @player.accelerate if button_down? Gosu::KbUp
     @player.move
+  end
 
-    @enemies.push(Enemy.new(self)) if rand < ENEMY_SPAWN_RATE
-
-    @enemies.map(&:move)
-    @bullets.map(&:move)
-
-    calculate_collisions
-
+  def clear_entities
     clear_finished_explosions
     clear_offscreen_bullets
     clear_offscreen_enemies
@@ -63,11 +86,14 @@ class SectorFive < Gosu::Window
     @enemies.each do |enemy|
       distance = Gosu.distance(@player.x, @player.y, enemy.x, enemy.y)
       next unless distance < @player.radius + enemy.radius
-      @enemies.delete enemy
-      @explosions.push Explosion.new(@player.x, @player.y)
-      # TODO: Make it visual!
-      puts 'RIP'
+      register_player_and_enemies_collission(enemy)
     end
+  end
+
+  def register_player_and_enemies_collission(enemy)
+    @enemies.delete enemy
+    @explosions.push Explosion.new(@player.x, @player.y)
+    @score -= DEATH_SCORE
   end
 
   def calculate_enemy_bullets_collissions
@@ -84,6 +110,8 @@ class SectorFive < Gosu::Window
     @enemies.delete enemy
     @bullets.delete bullet
     @explosions.push Explosion.new(enemy.x, enemy.y)
+
+    @score += HIT_SCORE
   end
 
   def clear_finished_explosions
