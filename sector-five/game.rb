@@ -11,12 +11,18 @@ class SectorFive < Gosu::Window
     super(SCREEN_WIDTH, SCREEN_HEIGHT)
     self.caption = 'Sector Five'
     @player = Player.new(self)
-    @enemy =  Enemy.new(self)
+
+    @enemies = []
+    spawn_enemies
+  end
+
+  def spawn_enemies
+    3.times { @enemies.push(Enemy.new(self)) }
   end
 
   def draw
     @player.draw
-    @enemy.draw
+    @enemies.map(&:draw)
   end
 
   def update
@@ -25,7 +31,7 @@ class SectorFive < Gosu::Window
     @player.accelerate if button_down? Gosu::KbUp
     @player.move
 
-    @enemy.move
+    @enemies.map(&:move)
   end
 end
 

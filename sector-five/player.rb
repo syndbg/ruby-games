@@ -1,7 +1,10 @@
+require 'byebug'
+
 class Player
-  TURN_RATE = 4
   ACCELERATION = 1
+  BOUNCE = 5
   FRICTION = 0.8
+  TURN_RATE = 4
 
   def initialize(window)
     @image = Gosu::Image.new('images/ship.png')
@@ -47,24 +50,24 @@ class Player
   def set_x_constraints
     if @x > @window.width - @radius
       @velocity_x = 0
-      @x = @window.width - @radius
+      @x = @window.width - @radius - BOUNCE
     end
 
     if @x < @radius
       @velocity_x = 0
-      @x = @radius
+      @x = @radius + BOUNCE
     end
   end
 
   def set_y_constraints
     if @y > @window.height - @radius
       @velocity_y = 0
-      @y = @window.height - @radius
+      @y = @window.height - @radius - BOUNCE
     end
 
     if @y < @radius
       @velocity_y = 0
-      @y = @radius
+      @y = @radius + BOUNCE
     end
   end
 end
