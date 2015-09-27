@@ -1,5 +1,5 @@
 class Enemy
-  SPEED = 4
+  MAX_SPEED = 6
 
   attr_reader :x, :y, :radius
 
@@ -7,13 +7,14 @@ class Enemy
     @image = Gosu::Image.new('images/enemy.png')
     @window = window
 
+    @speed = rand(1..MAX_SPEED)
     @radius = 20
     @x = rand(@window.width - 2 * @radius) + @radius
     @y = 0
   end
 
   def move
-    @y += SPEED
+    @y += @speed
   end
 
   def onscreen?
