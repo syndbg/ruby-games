@@ -78,7 +78,8 @@ class SectorFive < Gosu::Window
   end
 
   def calculate_collisions
-    calculate_enemy_bullets_collissions
+    calculate_enemy_and_bullets_collissions
+    calculate_enemy_and_explosions_collissions
     calculate_player_and_enemies_collissions
   end
 
@@ -96,7 +97,7 @@ class SectorFive < Gosu::Window
     @score -= DEATH_SCORE
   end
 
-  def calculate_enemy_bullets_collissions
+  def calculate_enemy_and_bullets_collissions
     @enemies.each do |enemy|
       @bullets.each do |bullet|
         distance = Gosu.distance(enemy.x, enemy.y, bullet.x, bullet.y)
@@ -104,6 +105,22 @@ class SectorFive < Gosu::Window
         register_enemy_bullets_collision(enemy, bullet)
       end
     end
+  end
+
+  def calculate_enemy_and_explosions_collissions
+    @enemies.each do |enemy|
+      @explosions.each do |explosion|
+        distance = Gosu.distance(enemy.x, enemy.y, explosion.x, explosion.y)
+        next unless distance < enemy.radius + explosion.radius
+        register_enemy_explosion_collission(enemy, explosion)
+      end
+    end
+  end
+
+  def register_enemy_explosion_collission(enemy, explosion)
+    @enemies.delete enemy
+    @explosions.delete explosion
+    @explosions.push Explosion.new(enemy.x, enemy.y)
   end
 
   def register_enemy_bullets_collision(enemy, bullet)
