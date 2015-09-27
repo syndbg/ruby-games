@@ -13,6 +13,7 @@ class SectorFive < Gosu::Window
   DEATH_SCORE = 50
 
   ENEMY_SPAWN_RATE = 0.02
+  ENEMY_SHOOT_RATE = 0.05
 
   def initialize
     super(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -42,21 +43,27 @@ class SectorFive < Gosu::Window
   end
 
   def button_down(id)
-    shoot_bullet if id == Gosu::KbSpace
+    player_shoot_bullet if id == Gosu::KbSpace
   end
 
-  def shoot_bullet
-    @bullets.push(Bullet.new(self, @player.x, @player.y, @player.angle))
+  def player_shoot_bullet
+    @bullets.push(Bullet.new(self, @player.x, @player.y, @player.angle, :player))
   end
 
   def update
     listen_to_player_movements
 
     @enemies.push(Enemy.new(self)) if rand < ENEMY_SPAWN_RATE
+    enemy_shoot_bullet(@enemies.sample) if rand < ENEMY_SHOOT_RATE
 
     move_entities
     calculate_collisions
     clear_entities
+  end
+
+  def enemy_shoot_bullet(enemy)
+    return if enemy.nil?
+    @bullets.push(Bullet.new(self, enemy.x, enemy.y, 0, :enemy))
   end
 
   def move_entities
@@ -79,6 +86,7 @@ class SectorFive < Gosu::Window
 
   def calculate_collisions
     calculate_enemy_and_bullets_collissions
+    calculate_player_and_bullets_collissions
     calculate_enemy_and_explosions_collissions
     calculate_player_and_enemies_collissions
   end
@@ -100,10 +108,22 @@ class SectorFive < Gosu::Window
   def calculate_enemy_and_bullets_collissions
     @enemies.each do |enemy|
       @bullets.each do |bullet|
+        next unless bullet.shooter == :player
         distance = Gosu.distance(enemy.x, enemy.y, bullet.x, bullet.y)
         next unless distance < enemy.radius + bullet.radius
         register_enemy_bullets_collision(enemy, bullet)
       end
+    end
+  end
+
+  def calculate_player_and_bullets_collissions
+    @bullets.each do |bullet|
+      next unless bullet.shooter == :enemy
+      distance = Gosu.distance(@player.x, @player.y, bullet.x, bullet.y)
+      next unless distance < @player.radius + bullet.radius
+      @bullets.delete bullet
+      @explosions.push Explosion.new(@player.x, @player.y)
+      @score -= DEATH_SCORE
     end
   end
 

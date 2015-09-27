@@ -1,10 +1,11 @@
 class Bullet
   SPEED = 5
 
-  attr_reader :x, :y, :radius
+  attr_reader :x, :y, :radius, :shooter
 
-  def initialize(window, x, y, angle)
-    @image = Gosu::Image.new('images/bullet.png')
+  def initialize(window, x, y, angle, shooter)
+    @shooter = shooter
+    @image = Gosu::Image.new("images/#{shooter}_bullet.png")
 
     @window = window
     @x = x
@@ -14,8 +15,14 @@ class Bullet
   end
 
   def move
-    @x += Gosu.offset_x(@angle, SPEED)
-    @y += Gosu.offset_y(@angle, SPEED)
+    case @shooter
+    when :player
+      @x += Gosu.offset_x(@angle, SPEED)
+      @y += Gosu.offset_y(@angle, SPEED)
+    when :enemy
+      @x -= Gosu.offset_x(@angle, SPEED)
+      @y -= Gosu.offset_y(@angle, SPEED)
+    end
   end
 
   def draw
